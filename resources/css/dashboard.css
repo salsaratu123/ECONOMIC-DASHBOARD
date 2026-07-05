@@ -1,0 +1,502 @@
+/* ===========================
+   GLOBAL
+=========================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#f5f7fb;
+    font-family:Poppins,sans-serif;
+}
+
+/* ===========================
+   SIDEBAR
+=========================== */
+
+.sidebar{
+
+    position:fixed;
+
+    left:0;
+
+    top:0;
+
+    width:250px;
+
+    height:100vh;
+
+    background:#182848;
+
+    color:white;
+
+    overflow:auto;
+
+}
+
+.logo{
+
+    padding:30px;
+
+}
+
+.logo h3{
+
+    font-weight:bold;
+
+}
+
+.sidebar ul{
+
+    list-style:none;
+
+    padding:0;
+
+}
+
+.sidebar li{
+
+    padding:15px 25px;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+.sidebar li:hover{
+
+    background:#2958ff;
+
+}
+
+.sidebar li i{
+
+    width:30px;
+
+}
+
+/* ===========================
+MAIN
+=========================== */
+
+.main-content{
+
+    margin-left:250px;
+
+    padding:25px;
+
+}
+
+/* ===========================
+TOPBAR
+=========================== */
+
+.topbar{
+
+    background:white;
+
+    border-radius:15px;
+
+    padding:15px 20px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    box-shadow:0 5px 20px rgba(0,0,0,.05);
+
+    margin-bottom:25px;
+
+}
+
+.search-box{
+
+    width:500px;
+
+}
+
+.top-right{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:20px;
+
+}
+
+.profile{
+
+    width:42px;
+
+    height:42px;
+
+    border-radius:50%;
+
+}
+
+/* ===========================
+CARDS
+=========================== */
+
+.stat-card{
+
+    background:white;
+
+    border-radius:20px;
+
+    padding:20px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    box-shadow:0 5px 20px rgba(0,0,0,.06);
+
+    margin-bottom:20px;
+
+}
+
+.stat-card h2{
+
+    font-size:30px;
+
+    font-weight:bold;
+
+}
+
+.stat-card i{
+
+    font-size:40px;
+
+}
+
+.blue{
+
+    border-left:5px solid #3b82f6;
+
+}
+
+.green{
+
+    border-left:5px solid #22c55e;
+
+}
+
+.orange{
+
+    border-left:5px solid #f59e0b;
+
+}
+
+.purple{
+
+    border-left:5px solid #7c3aed;
+
+}
+
+/* ===========================
+MAP
+=========================== */
+
+#map{
+
+    height:520px;
+
+    border-radius:20px;
+
+}
+
+/* ===========================
+CARD
+=========================== */
+
+.card{
+
+    border:none;
+
+    border-radius:20px;
+
+    box-shadow:0 5px 20px rgba(0,0,0,.06);
+
+}
+
+.card-header{
+
+    background:white;
+
+    font-weight:bold;
+
+}
+
+.menu-title{
+
+    color:#9ea8c7;
+
+    font-size:12px;
+
+    padding:20px 25px 8px;
+
+    font-weight:bold;
+
+    letter-spacing:1px;
+
+}
+
+.sidebar li{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    border-radius:12px;
+
+    margin:5px 10px;
+
+}
+
+.sidebar li.active{
+
+    background:#3b82f6;
+
+}
+
+.sidebar li:hover{
+
+    background:#2958ff;
+
+}
+
+.sidebar li i{
+
+    font-size:18px;
+
+}
+
+.logo h3{
+
+    font-size:30px;
+
+}
+
+.logo small{
+
+    color:#b8c2e0;
+
+}
+
+.search-box{
+
+    border-radius:12px;
+
+}
+
+.topbar{
+
+    position:sticky;
+
+    top:20px;
+
+    z-index:100;
+
+}
+
+.summary-card{
+
+    background:white;
+
+    border-radius:18px;
+
+    padding:22px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:20px;
+
+    box-shadow:0 8px 25px rgba(0,0,0,.08);
+
+    transition:.3s;
+
+}
+
+.summary-card:hover{
+
+    transform:translateY(-5px);
+
+}
+
+.summary-card .icon{
+
+    width:65px;
+
+    height:65px;
+
+    border-radius:50%;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    color:white;
+
+    font-size:28px;
+
+}
+
+.bg-purple{
+
+    background:#6f42c1;
+
+}
+
+.summary-card h2{
+
+    margin-top:5px;
+
+    font-weight:bold;
+
+}
+
+.summary-card small{
+
+    color:#777;
+
+}
+
+#map{
+
+    height:550px;
+
+    width:100%;
+
+    border-radius:20px;
+
+}
+
+.leaflet-container{
+
+    border-radius:20px;
+
+}
+
+.card-body p{
+
+    margin-bottom:10px;
+
+}
+
+.card-header{
+
+    font-size:15px;
+
+}
+
+.card-header i{
+
+    margin-right:8px;
+
+    color:#2563eb;
+
+}
+
+/* ===========================
+   DASHBOARD LAYOUT
+=========================== */
+
+.wrapper{
+    display:flex;
+}
+
+.main{
+    flex:1;
+    margin-left:250px;
+    min-height:100vh;
+    background:#f5f7fb;
+}
+
+.content{
+    padding:25px;
+}
+
+/* ===========================
+   NEWS
+=========================== */
+
+.news-item{
+    border-bottom:1px solid #eee;
+    padding:12px 0;
+}
+
+.news-item:last-child{
+    border-bottom:none;
+}
+
+.news-item a{
+    text-decoration:none;
+    color:#222;
+    font-weight:600;
+}
+
+.news-item a:hover{
+    color:#2563eb;
+}
+
+/* ===========================
+   SHIPMENT TABLE
+=========================== */
+
+.table td{
+    vertical-align:middle;
+}
+
+.badge{
+    border-radius:20px;
+    padding:8px 12px;
+}
+
+/* ===========================
+   RIGHT PANEL
+=========================== */
+
+.right-panel .card{
+    margin-bottom:20px;
+}
+
+/* ===========================
+   CARD HOVER
+=========================== */
+
+.card{
+    transition:.3s;
+}
+
+.card:hover{
+    transform:translateY(-3px);
+}
+
+/* ===========================
+   SCROLLBAR
+=========================== */
+
+.sidebar::-webkit-scrollbar{
+    width:6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb{
+    background:#3b82f6;
+    border-radius:20px;
+}
