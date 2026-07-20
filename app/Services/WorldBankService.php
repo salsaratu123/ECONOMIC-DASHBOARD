@@ -3,11 +3,13 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 
 class WorldBankService
 {
     public function getEconomy($country = 'IDN')
     {
+        return Cache::remember('economy:' . strtoupper($country), now()->addHours(12), function () use ($country) {
         $indicators = [
             'gdp' => 'NY.GDP.MKTP.CD',
             'inflation' => 'FP.CPI.TOTL.ZG',
@@ -20,10 +22,15 @@ class WorldBankService
 
             $url = "https://api.worldbank.org/v2/country/{$country}/indicator/{$indicator}";
 
-            $response = Http::get($url, [
-                'format' => 'json',
-                'per_page' => 10
-            ]);
+            try {
+                $response = Http::timeout(15)->get($url, [
+                    'format' => 'json',
+                    'per_page' => 10
+                ]);
+            } catch (\Throwable) {
+                $result[$key] = null;
+                continue;
+            }
 
             if (!$response->successful()) {
                 $result[$key] = null;
@@ -52,5 +59,6 @@ class WorldBankService
         }
 
         return $result;
+        });
     }
 }

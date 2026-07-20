@@ -35,4 +35,13 @@ return [
         ],
     ],
 
-];
+    'gnews' => [
+            'key' => env('GNEWS_API_KEY'),
+        ],
+
+        // Tambahkan ini Kem untuk Marine Traffic API
+        'marinetraffic' => [
+            'key' => env('MARINETRAFFIC_API_KEY'),
+        ],
+
+    ];

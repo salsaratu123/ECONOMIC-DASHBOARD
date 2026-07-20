@@ -1,502 +1,445 @@
-/* ===========================
-   GLOBAL
-=========================== */
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+/* ==========================================================================
+   VARIABLES & DESIGN SYSTEM (MODERN SYSTEM)
+   ========================================================================== */
+:root {
+    --bg-main: #f8fafc;
+    --bg-card: #ffffff;
+    --sidebar-bg: #0b1329;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --primary-color: #3b82f6;
+    --primary-hover: #2563eb;
+    --border-subtle: rgba(226, 232, 240, 0.6);
+    --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-body{
-    background:#f5f7fb;
-    font-family:Poppins,sans-serif;
+* {
+    box-sizing: border-box;
 }
 
-/* ===========================
-   SIDEBAR
-=========================== */
-
-.sidebar{
-
-    position:fixed;
-
-    left:0;
-
-    top:0;
-
-    width:250px;
-
-    height:100vh;
-
-    background:#182848;
-
-    color:white;
-
-    overflow:auto;
-
+body {
+    background: var(--bg-main);
+    color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
 }
 
-.logo{
-
-    padding:30px;
-
+body.dark-mode {
+    --bg-main: #0b0f19;
+    --bg-card: #151f32;
+    --sidebar-bg: #070a13;
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-muted: #64748b;
+    --border-subtle: rgba(30, 41, 59, 0.7);
 }
 
-.logo h3{
-
-    font-weight:bold;
-
+a {
+    color: inherit;
+    text-decoration: none;
+    transition: var(--transition-smooth);
 }
 
-.sidebar ul{
-
-    list-style:none;
-
-    padding:0;
-
+.wrapper {
+    display: flex;
 }
 
-.sidebar li{
-
-    padding:15px 25px;
-
-    cursor:pointer;
-
-    transition:.3s;
-
+/* ==========================================================================
+   SIDEBAR COMPONENT (PREMIUM LOOK)
+   ========================================================================== */
+.sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 260px;
+    background: var(--sidebar-bg);
+    color: #ffffff;
+    overflow-y: auto;
+    z-index: 1030;
+    border-right: 1px solid var(--border-subtle);
+    transition: var(--transition-smooth);
 }
 
-.sidebar li:hover{
-
-    background:#2958ff;
-
+.logo {
+    padding: 32px 24px 20px;
 }
 
-.sidebar li i{
-
-    width:30px;
-
+.logo h3 {
+    font-size: 20px;
+    font-weight: 800;
+    margin: 8px 0 0;
+    letter-spacing: -0.02em;
+    background: linear-gradient(to right, #ffffff, #93c5fd);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-/* ===========================
-MAIN
-=========================== */
-
-.main-content{
-
-    margin-left:250px;
-
-    padding:25px;
-
+.logo small {
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 11px;
 }
 
-/* ===========================
-TOPBAR
-=========================== */
-
-.topbar{
-
-    background:white;
-
-    border-radius:15px;
-
-    padding:15px 20px;
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    box-shadow:0 5px 20px rgba(0,0,0,.05);
-
-    margin-bottom:25px;
-
+.sidebar ul {
+    list-style: none;
+    margin: 0;
+    padding: 0 16px;
 }
 
-.search-box{
-
-    width:500px;
-
+.sidebar li {
+    border-radius: 12px;
+    margin-bottom: 6px;
+    transition: var(--transition-smooth);
 }
 
-.top-right{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:20px;
-
+.sidebar li a {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    color: #94a3b8;
+    font-weight: 600;
+    font-size: 14px;
 }
 
-.profile{
-
-    width:42px;
-
-    height:42px;
-
-    border-radius:50%;
-
+.sidebar li a i {
+    font-size: 18px;
+    transition: var(--transition-smooth);
 }
 
-/* ===========================
-CARDS
-=========================== */
-
-.stat-card{
-
-    background:white;
-
-    border-radius:20px;
-
-    padding:20px;
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    box-shadow:0 5px 20px rgba(0,0,0,.06);
-
-    margin-bottom:20px;
-
+.sidebar li.active,
+.sidebar li:hover {
+    background: rgba(59, 130, 246, 0.15);
 }
 
-.stat-card h2{
-
-    font-size:30px;
-
-    font-weight:bold;
-
+.sidebar li.active a,
+.sidebar li:hover a {
+    color: #3b82f6;
 }
 
-.stat-card i{
-
-    font-size:40px;
-
+/* ==========================================================================
+   MAIN CONTENT AREA
+   ========================================================================== */
+.main {
+    flex: 1;
+    min-height: 100vh;
+    margin-left: 260px;
+    background: var(--bg-main);
+    transition: var(--transition-smooth);
 }
 
-.blue{
-
-    border-left:5px solid #3b82f6;
-
+body.dark-mode .main {
+    background: var(--bg-main);
 }
 
-.green{
-
-    border-left:5px solid #22c55e;
-
+.content {
+    padding: 32px;
 }
 
-.orange{
-
-    border-left:5px solid #f59e0b;
-
+/* ==========================================================================
+   COMPONENTS CARDS & GLASSMORPHISM DESIGN
+   ========================================================================== */
+.navbar,
+.card,
+.summary-card {
+    border: 1px solid var(--border-subtle) !important;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.02) !important;
+    background: var(--bg-card);
+    transition: var(--transition-smooth);
 }
 
-.purple{
-
-    border-left:5px solid #7c3aed;
-
+.card,
+.summary-card {
+    border-radius: 16px !important;
 }
 
-/* ===========================
-MAP
-=========================== */
-
-#map{
-
-    height:520px;
-
-    border-radius:20px;
-
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05) !important;
 }
 
-/* ===========================
-CARD
-=========================== */
-
-.card{
-
-    border:none;
-
-    border-radius:20px;
-
-    box-shadow:0 5px 20px rgba(0,0,0,.06);
-
+.card-header {
+    background: var(--bg-card) !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
+    font-weight: 700 !important;
+    color: var(--text-primary);
+    padding: 18px 24px !important;
+    font-size: 15px;
+    letter-spacing: -0.01em;
 }
 
-.card-header{
-
-    background:white;
-
-    font-weight:bold;
-
+body.dark-mode .navbar,
+body.dark-mode .card,
+body.dark-mode .summary-card,
+body.dark-mode .card-header,
+body.dark-mode .form-control,
+body.dark-mode .form-select,
+body.dark-mode .input-group-text {
+    background-color: var(--bg-card) !important;
+    color: var(--text-primary);
+    border-color: var(--border-subtle) !important;
 }
 
-.menu-title{
-
-    color:#9ea8c7;
-
-    font-size:12px;
-
-    padding:20px 25px 8px;
-
-    font-weight:bold;
-
-    letter-spacing:1px;
-
+body.dark-mode .text-muted,
+body.dark-mode .summary-card small,
+body.dark-mode .news-card p {
+    color: var(--text-secondary) !important;
 }
 
-.sidebar li{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:15px;
-
-    border-radius:12px;
-
-    margin:5px 10px;
-
+/* ==========================================================================
+   WIDGET METRIK RINGKASAN (SUMMARY MATRIX INTERFACE)
+   ========================================================================== */
+.summary-card {
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
 }
 
-.sidebar li.active{
-
-    background:#3b82f6;
-
+.summary-card .icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    color: #ffffff;
+    font-size: 20px;
+    flex: 0 0 auto;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
 }
 
-.sidebar li:hover{
+/* Penyesuaian skema warna ikon pastel modern */
+.summary-card .bg-primary { background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important; }
+.summary-card .bg-info { background: linear-gradient(135deg, #06b6d4, #0891b2) !important; }
+.summary-card .bg-success { background: linear-gradient(135deg, #10b981, #047857) !important; }
+.summary-card .bg-warning { background: linear-gradient(135deg, #f59e0b, #b45309) !important; }
+.summary-card .bg-danger { background: linear-gradient(135deg, #ef4444, #b91c1c) !important; }
 
-    background:#2958ff;
-
+.bg-purple {
+    background: linear-gradient(135deg, #8b5cf6, #6d28d9) !important;
 }
 
-.sidebar li i{
-
-    font-size:18px;
-
+.summary-card h2 {
+    font-size: 22px;
+    font-weight: 800;
+    margin: 2px 0 0;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
 }
 
-.logo h3{
-
-    font-size:30px;
-
+.summary-card small {
+    color: var(--text-secondary);
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-.logo small{
-
-    color:#b8c2e0;
-
+/* ==========================================================================
+   GEOSPATIAL LEAFLET MAP & INTERFACE WIDGETS
+   ========================================================================== */
+#map {
+    width: 100%;
+    height: 500px !important;
+    border-radius: 0 0 16px 16px;
 }
 
-.search-box{
-
-    border-radius:12px;
-
+.country-flag {
+    width: 56px;
+    height: 38px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid var(--border-subtle);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.topbar{
-
-    position:sticky;
-
-    top:20px;
-
-    z-index:100;
-
+/* FORM ELEMENTS STYLE */
+.form-control, .form-select {
+    border-radius: 10px !important;
+    padding: 10px 14px !important;
+    border: 1px solid var(--border-subtle) !important;
+    background-color: var(--bg-main) !important;
+    font-size: 14px !important;
 }
 
-.summary-card{
-
-    background:white;
-
-    border-radius:18px;
-
-    padding:22px;
-
-    display:flex;
-
-    align-items:center;
-
-    gap:20px;
-
-    box-shadow:0 8px 25px rgba(0,0,0,.08);
-
-    transition:.3s;
-
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
 }
 
-.summary-card:hover{
-
-    transform:translateY(-5px);
-
+/* ==========================================================================
+   INTELLIGENCE NEWS WIDGET STYLING
+   ========================================================================== */
+.news-card {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border-subtle);
 }
 
-.summary-card .icon{
-
-    width:65px;
-
-    height:65px;
-
-    border-radius:50%;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    color:white;
-
-    font-size:28px;
-
+.news-card:last-child {
+    border-bottom: 0;
 }
 
-.bg-purple{
-
-    background:#6f42c1;
-
+.news-card a {
+    display: block;
+    color: var(--text-primary);
+    font-weight: 700;
+    line-height: 1.3;
+    font-size: 14px;
 }
 
-.summary-card h2{
-
-    margin-top:5px;
-
-    font-weight:bold;
-
+.news-card a:hover {
+    color: var(--primary-color);
 }
 
-.summary-card small{
-
-    color:#777;
-
+.news-card p {
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin: 6px 0;
 }
 
-#map{
-
-    height:550px;
-
-    width:100%;
-
-    border-radius:20px;
-
+.news-image {
+    width: 80px;
+    height: 62px;
+    border-radius: 10px;
+    object-fit: cover;
+    background: var(--bg-main);
+    border: 1px solid var(--border-subtle);
 }
 
-.leaflet-container{
-
-    border-radius:20px;
-
+.news-placeholder {
+    display: grid;
+    place-items: center;
+    color: var(--text-muted);
 }
 
-.card-body p{
-
-    margin-bottom:10px;
-
+.empty-state {
+    padding: 24px;
+    border: 1px dashed var(--text-muted);
+    border-radius: 12px;
+    color: var(--text-secondary);
+    text-align: center;
+    background: var(--bg-main);
+    font-weight: 500;
 }
 
-.card-header{
-
-    font-size:15px;
-
+/* ==========================================================================
+   TABLES & SHIPPINGS ARCHITECTURE
+   ========================================================================== */
+.table th {
+    font-weight: 700;
+    color: var(--text-secondary);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    padding: 14px !important;
+    background-color: rgba(248, 250, 252, 0.6) !important;
 }
 
-.card-header i{
-
-    margin-right:8px;
-
-    color:#2563eb;
-
+body.dark-mode .table th {
+    background-color: rgba(30, 41, 59, 0.4) !important;
 }
 
-/* ===========================
-   DASHBOARD LAYOUT
-=========================== */
-
-.wrapper{
-    display:flex;
+.table td {
+    padding: 14px !important;
+    font-size: 14px;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-subtle);
 }
 
-.main{
-    flex:1;
-    margin-left:250px;
-    min-height:100vh;
-    background:#f5f7fb;
+.badge {
+    border-radius: 8px !important;
+    padding: 6px 12px !important;
+    font-weight: 700 !important;
+    font-size: 11px !important;
+    letter-spacing: 0.02em;
 }
 
-.content{
-    padding:25px;
+/* ==========================================================================
+   SKELETON ANIMATIONS & UTILITIES
+   ========================================================================== */
+.skeleton-line {
+    width: 100%;
+    height: 14px;
+    margin-bottom: 12px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #e2e8f0 25%, #f8fafc 37%, #e2e8f0 63%);
+    background-size: 400% 100%;
+    animation: skeleton-loading 1.4s ease infinite;
 }
 
-/* ===========================
-   NEWS
-=========================== */
-
-.news-item{
-    border-bottom:1px solid #eee;
-    padding:12px 0;
+body.dark-mode .skeleton-line {
+    background: linear-gradient(90deg, #1e293b 25%, #334155 37%, #1e293b 63%);
+    background-size: 400% 100%;
 }
 
-.news-item:last-child{
-    border-bottom:none;
+.skeleton-line.short {
+    width: 62%;
 }
 
-.news-item a{
-    text-decoration:none;
-    color:#222;
-    font-weight:600;
+@keyframes skeleton-loading {
+    0% { background-position: 100% 50%; }
+    100% { background-position: 0 50%; }
 }
 
-.news-item a:hover{
-    color:#2563eb;
+.loading-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: grid;
+    place-items: center;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(4px);
 }
 
-/* ===========================
-   SHIPMENT TABLE
-=========================== */
-
-.table td{
-    vertical-align:middle;
+.dashboard-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 32px;
+    padding: 20px 0 4px;
+    color: var(--text-muted);
+    font-size: 13px;
+    border-top: 1px solid var(--border-subtle);
 }
 
-.badge{
-    border-radius:20px;
-    padding:8px 12px;
-}
+/* ==========================================================================
+   RESPONSIVE DESIGN SYSTEM
+   ========================================================================== */
+@media (max-width: 991.98px) {
+    .sidebar {
+        position: static;
+        width: 100%;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--border-subtle);
+    }
 
-/* ===========================
-   RIGHT PANEL
-=========================== */
+    .wrapper {
+        display: block;
+    }
 
-.right-panel .card{
-    margin-bottom:20px;
-}
+    .main {
+        margin-left: 0;
+    }
 
-/* ===========================
-   CARD HOVER
-=========================== */
+    .content {
+        padding: 20px;
+    }
 
-.card{
-    transition:.3s;
-}
+    #map {
+        height: 420px !important;
+    }
 
-.card:hover{
-    transform:translateY(-3px);
-}
-
-/* ===========================
-   SCROLLBAR
-=========================== */
-
-.sidebar::-webkit-scrollbar{
-    width:6px;
-}
-
-.sidebar::-webkit-scrollbar-thumb{
-    background:#3b82f6;
-    border-radius:20px;
+    .dashboard-footer {
+        display: block;
+        text-align: center;
+    }
 }

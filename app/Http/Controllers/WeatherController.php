@@ -2,26 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\WeatherService;
+use Illuminate\Http\Request;
 
 class WeatherController extends Controller
 {
-    protected $weather;
-
-    public function __construct(WeatherService $weather)
-    {
-        $this->weather = $weather;
-    }
-
+    /**
+     * Menampilkan halaman dashboard pemantauan cuaca global (Global Weather Monitoring)
+     */
     public function index()
     {
         return view('weather.index');
-    }
-
-    public function current()
-    {
-        return response()->json(
-            $this->weather->getWeather()
-        );
     }
 }

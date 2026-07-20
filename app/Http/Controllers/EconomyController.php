@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\WorldBankService;
+use App\Services\EconomyService;
+use Illuminate\Http\Request;
 
 class EconomyController extends Controller
 {
     protected $worldbank;
 
-    public function __construct(WorldBankService $worldbank)
+    public function __construct(EconomyService $worldbank)
     {
         $this->worldbank = $worldbank;
     }
@@ -18,10 +19,10 @@ class EconomyController extends Controller
         return view('economy.index');
     }
 
-    public function current()
+    public function current(Request $request)
     {
         return response()->json(
-            $this->worldbank->getEconomy()
+            $this->worldbank->getEconomy($request->query('country', 'IDN'))
         );
     }
 }

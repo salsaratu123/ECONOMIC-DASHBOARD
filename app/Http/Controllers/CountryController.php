@@ -2,33 +2,39 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Services\CountryService;
 
 class CountryController extends Controller
 {
-    protected CountryService $country;
+    protected CountryService $countryService;
 
-    public function __construct(CountryService $country)
+    public function __construct(CountryService $countryService)
     {
-        $this->country = $country;
+        $this->countryService = $countryService;
     }
 
+    /**
+     * Menampilkan Halaman Utama Data Negara
+     */
     public function index()
     {
-        return view('countries.index');
+        return view('country.index');
     }
 
-    public function all()
+    /**
+     * Menampilkan Halaman Perbandingan Negara (Fitur No 8 dari PDF)
+     */
+    public function comparison()
     {
-        return response()->json(
-            $this->country->all()
-        );
+        return view('country.comparison');
     }
 
-    public function detail($name)
+    /**
+     * Menampilkan Halaman Watchlist / Favorit (Fitur No 9 dari PDF)
+     */
+    public function watchlist()
     {
-        return response()->json(
-            $this->country->find($name)
-        );
+        return view('country.watchlist');
     }
 }
