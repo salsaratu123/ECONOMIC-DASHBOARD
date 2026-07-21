@@ -8,6 +8,7 @@ use App\Http\Controllers\ExchangeController;
 use App\Http\Controllers\CountryController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\MarineController;
+use App\Http\Controllers\UserPreferenceController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Middleware\IsAdmin;
 
@@ -19,6 +20,11 @@ use App\Http\Middleware\IsAdmin;
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
 Route::get('/api/dashboard', [DashboardController::class, 'data']);
+
+// Route Simpan Pengaturan Dashboard Khusus User (Login Required)
+Route::middleware('auth')->group(function () {
+    Route::post('/user/preferences', [UserPreferenceController::class, 'update'])->name('user.preferences.update');
+});
 
 // Modul View Blade Multi-API
 Route::get('/weather', [WeatherController::class, 'index'])->name('weather.index');
@@ -59,9 +65,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
 Route::prefix('admin')->name('admin.')->middleware(['auth', IsAdmin::class])->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     
-    // Fitur Management Pengontrol Tampilan User
+    // Management Pengontrol Tampilan & API Keys Admin
     Route::get('/settings', [AdminDashboardController::class, 'settings'])->name('settings');
     Route::post('/settings', [AdminDashboardController::class, 'updateSettings'])->name('settings.update');
+    
+    // Alias Route untuk Pengaturan API Key (Memperbaiki RouteNotFoundException)
+    Route::post('/settings/apikeys', [AdminDashboardController::class, 'updateApiKeys'])->name('settings.apikeys');
     
     Route::get('/users', [AdminDashboardController::class, 'users'])->name('users');
     Route::get('/ports', [AdminDashboardController::class, 'ports'])->name('ports');
