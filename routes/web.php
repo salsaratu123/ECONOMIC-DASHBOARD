@@ -38,10 +38,9 @@ Route::get('/watchlist', [CountryController::class, 'watchlist'])->name('countri
 
 /*
 |--------------------------------------------------------------------------
-| Admin Authentication Routes (Ditambahkan alias route 'login')
+| Admin Authentication Routes
 |--------------------------------------------------------------------------
 */
-// Fallback alias 'login' agar Middleware Auth Laravel tidak throw Exception 500
 Route::get('/login', [AdminDashboardController::class, 'showLoginForm'])->name('login');
 
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -54,12 +53,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Admin Dashboard Group (Terproteksi Middleware Auth)
+| Admin Dashboard Group
 |--------------------------------------------------------------------------
 */
 Route::prefix('admin')->name('admin.')->middleware(['auth', IsAdmin::class])->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-    Route::post('/settings/apikeys', [AdminDashboardController::class, 'updateApiKeys'])->name('settings.apikeys');
+    
+    // Fitur Management Pengontrol Tampilan User
+    Route::get('/settings', [AdminDashboardController::class, 'settings'])->name('settings');
+    Route::post('/settings', [AdminDashboardController::class, 'updateSettings'])->name('settings.update');
+    
     Route::get('/users', [AdminDashboardController::class, 'users'])->name('users');
     Route::get('/ports', [AdminDashboardController::class, 'ports'])->name('ports');
     Route::get('/articles', [AdminDashboardController::class, 'articles'])->name('articles');

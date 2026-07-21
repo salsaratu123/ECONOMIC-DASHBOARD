@@ -1,3 +1,6 @@
+@php
+    use App\Models\Setting;
+@endphp
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -5,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
-    <title>Global Supply Chain Risk Intelligence Platform</title>
+    <title>{{ Setting::get('site_title', 'Global Supply Chain Risk Intelligence Platform') }}</title>
     
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     
@@ -34,7 +37,7 @@
             width: 100%;
             background-color: #f4f6f9;
             display: flex;
-            flex-column: min-height;
+            flex-direction: column;
             overflow-y: auto;
         }
         .content {
@@ -44,7 +47,7 @@
         #map {
             height: 450px;
             width: 100%;
-            border-radius: 0 0 16px 16px;
+            border-radius: 12px;
             z-index: 1;
         }
         .transition-hover {
@@ -64,7 +67,7 @@
             justify-content: center;
         }
         .dashboard-footer {
-            background: #white;
+            background: #ffffff;
             border-top: 1px solid #e3e6f0;
             padding: 1rem 1.5rem;
             display: flex;
@@ -84,6 +87,13 @@
     @include('dashboard.sidebar')
 
     <div class="main d-flex flex-column w-100">
+        <!-- Running Alert Announcement Bar Dinamis dari Admin -->
+        @if($announcement = Setting::get('announcement_bar'))
+            <div class="bg-warning text-dark px-3 py-2 text-center font-semibold text-sm shadow-sm border-bottom border-warning">
+                <i class="bi bi-megaphone-fill me-2"></i> {{ $announcement }}
+            </div>
+        @endif
+
         <div class="content">
             @yield('content')
             

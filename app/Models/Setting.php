@@ -9,11 +9,11 @@ class Setting extends Model
     protected $fillable = ['key', 'value'];
 
     /**
-     * Helper untuk mengambil nilai setting atau fallback ke config/.env
+     * Helper static untuk mengambil nilai setting di mana saja
      */
     public static function get($key, $default = null)
     {
         $setting = static::where('key', $key)->first();
-        return $setting ? $setting->value : config("services.{$key}", $default);
+        return $setting ? $setting->value : $default;
     }
 }

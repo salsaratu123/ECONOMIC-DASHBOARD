@@ -1,40 +1,67 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-4 py-6">
-    <h1 class="text-2xl font-bold mb-4">Marine Traffic Live Monitor</h1>
+@php
+    use App\Models\Setting;
+@endphp
 
-    <!-- Container Peta -->
-    <div id="map" class="w-full h-96 rounded-lg shadow-md mb-6 bg-gray-100 relative z-0"></div>
+<div class="container-fluid px-0">
+    <!-- Header Title Section Dinamis -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">{{ Setting::get('hero_heading', 'Marine Traffic Live Monitor') }}</h3>
+            <p class="text-muted mb-0">{{ Setting::get('hero_subheading', 'Pantau pergerakan kapal dan risiko maritim secara real-time.') }}</p>
+        </div>
+        <span class="badge bg-primary px-3 py-2 rounded-pill">
+            <i class="bi bi-broadcast me-1"></i> Live Stream Active
+        </span>
+    </div>
 
-    <!-- Tabel Monitoring Pelabuhan/Kapal -->
-    <div class="bg-white rounded-lg shadow overflow-x-auto">
-        <table class="min-w-full leading-normal">
-            <thead>
-                <tr class="bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    <th class="px-5 py-3">Nama / Kapal</th>
-                    <th class="px-5 py-3">Kode / MMSI</th>
-                    <th class="px-5 py-3">Negara</th>
-                    <th class="px-5 py-3">Koordinat</th>
-                    <th class="px-5 py-3">Speed / Congestion</th>
-                </tr>
-            </thead>
-            <tbody id="marine-table-body">
-                <tr>
-                    <td colspan="5" class="px-5 py-5 text-center text-gray-500">Memuat data live dari ShipFinder API...</td>
-                </tr>
-            </tbody>
-        </table>
+    <!-- Map Card Container -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+        <div class="card-body p-0">
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <!-- Data Table Container -->
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header bg-white py-3 border-0">
+            <h5 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-ship text-primary me-2"></i>Daftar Kapal & Pelabuhan Terdeteksi
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Nama / Kapal</th>
+                            <th>Kode / MMSI</th>
+                            <th>Negara</th>
+                            <th>Koordinat</th>
+                            <th>Kecepatan / Congestion</th>
+                        </tr>
+                    </thead>
+                    <tbody id="marine-table-body">
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">
+                                <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                                Memuat data maritim live...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
+@endsection
 
-<!-- Dependency Leaflet CSS & JS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
+@push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Safe Reset Container Leaflet
+        // Reset Map Container
         const mapContainer = L.DomUtil.get('map');
         if (mapContainer != null) {
             mapContainer._leaflet_id = null;
@@ -47,7 +74,7 @@
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
-        // Fetch Live Data dari API
+        // Fetch Data AJAX
         fetch('/api/marine')
             .then(res => res.json())
             .then(data => {
@@ -57,7 +84,7 @@
                 tableBody.innerHTML = '';
 
                 if (!data || data.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="5" class="px-5 py-5 text-center text-red-500 font-semibold">Tidak ada data kapal terdeteksi saat ini.</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-danger font-semibold">Tidak ada data kapal terdeteksi saat ini.</td></tr>`;
                     return;
                 }
 
@@ -69,12 +96,12 @@
                     }
 
                     const row = `
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="px-5 py-4 text-sm font-semibold text-gray-900">${item.name}</td>
-                            <td class="px-5 py-4 text-sm text-gray-600">${item.port_code}</td>
-                            <td class="px-5 py-4 text-sm text-gray-600">${item.country_iso}</td>
-                            <td class="px-5 py-4 text-sm text-gray-600">${item.latitude}, ${item.longitude}</td>
-                            <td class="px-5 py-4 text-sm text-gray-600">${item.congestion} knots</td>
+                        <tr>
+                            <td class="ps-4 fw-bold text-dark">${item.name}</td>
+                            <td><span class="badge bg-light text-dark border">${item.port_code}</span></td>
+                            <td><span class="badge bg-info text-dark">${item.country_iso}</span></td>
+                            <td class="text-muted">${item.latitude}, ${item.longitude}</td>
+                            <td><span class="fw-bold text-primary">${item.congestion} knots</span></td>
                         </tr>
                     `;
                     tableBody.innerHTML += row;
@@ -84,9 +111,9 @@
                 console.error('Fetch Error:', err);
                 const tableBody = document.getElementById('marine-table-body');
                 if (tableBody) {
-                    tableBody.innerHTML = `<tr><td colspan="5" class="px-5 py-5 text-center text-red-500 font-semibold">Gagal memuat data dari server.</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-danger font-semibold">Gagal memuat data dari server.</td></tr>`;
                 }
             });
     });
 </script>
-@endsection
+@endpush
