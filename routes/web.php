@@ -18,6 +18,7 @@ use App\Http\Middleware\IsAdmin;
 |--------------------------------------------------------------------------
 */
 
+// Halaman Utama Public Dashboard
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
 Route::get('/api/dashboard', [DashboardController::class, 'data']);
 
@@ -26,7 +27,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/user/preferences', [UserPreferenceController::class, 'update'])->name('user.preferences.update');
 });
 
-// Modul View Blade Multi-API
+// Modul View Blade Multi-API Public
 Route::get('/weather', [WeatherController::class, 'index'])->name('weather.index');
 Route::get('/economy', [EconomyController::class, 'index'])->name('economy.index');
 Route::get('/exchange', [ExchangeController::class, 'index'])->name('exchange.index');
@@ -59,20 +60,30 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Admin Dashboard Group
+| Admin Dashboard & Management Group
 |--------------------------------------------------------------------------
 */
 Route::prefix('admin')->name('admin.')->middleware(['auth', IsAdmin::class])->group(function () {
+    // Dashboard Utama Admin
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     
+    // Management Grafik Dinamis Admin (Urutan, Tambah & Reset via API)
+    Route::post('/charts/update', [AdminDashboardController::class, 'updateChartsConfig'])->name('charts.update');
+    Route::post('/charts/reset', [AdminDashboardController::class, 'resetChartsConfig'])->name('charts.reset');
+    Route::post('/charts/add', [AdminDashboardController::class, 'addChart'])->name('charts.add');
+
+    // Management Pelabuhan & Rute Maritim
+    Route::get('/ports', [AdminDashboardController::class, 'ports'])->name('ports');
+    Route::post('/ports', [AdminDashboardController::class, 'storePort'])->name('ports.store');
+    Route::post('/routes', [AdminDashboardController::class, 'storeRoute'])->name('routes.store');
+
     // Management Pengontrol Tampilan & API Keys Admin
     Route::get('/settings', [AdminDashboardController::class, 'settings'])->name('settings');
     Route::post('/settings', [AdminDashboardController::class, 'updateSettings'])->name('settings.update');
-    
-    // Alias Route untuk Pengaturan API Key (Memperbaiki RouteNotFoundException)
     Route::post('/settings/apikeys', [AdminDashboardController::class, 'updateApiKeys'])->name('settings.apikeys');
+    Route::post('/apikeys', [AdminDashboardController::class, 'updateApiKeys'])->name('apikeys.update');
     
+    // User & Article Management
     Route::get('/users', [AdminDashboardController::class, 'users'])->name('users');
-    Route::get('/ports', [AdminDashboardController::class, 'ports'])->name('ports');
     Route::get('/articles', [AdminDashboardController::class, 'articles'])->name('articles');
 });

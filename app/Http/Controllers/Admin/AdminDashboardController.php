@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Port;
+use App\Models\Route as MarineRoute;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -11,30 +13,19 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminDashboardController extends Controller
 {
-    /**
-     * Tampilkan Halaman Login Admin
-     */
     public function showLoginForm()
     {
         if (Auth::check()) {
             return redirect()->route('admin.dashboard');
         }
 
-        // Dipanggil sesuai struktur folder: resources/views/admin/auth/login.blade.php
         if (view()->exists('admin.auth.login')) {
             return view('admin.auth.login');
         }
 
-        if (view()->exists('admin.login')) {
-            return view('admin.login');
-        }
-
-        return view('auth.login');
+        return view('admin.login');
     }
 
-    /**
-     * Proses Login Admin
-     */
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -44,7 +35,6 @@ class AdminDashboardController extends Controller
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-
             return redirect()->intended(route('admin.dashboard'));
         }
 
@@ -53,26 +43,15 @@ class AdminDashboardController extends Controller
         ])->onlyInput('email');
     }
 
-    /**
-     * Tampilkan Halaman Register Admin
-     */
     public function showRegisterForm()
     {
-        // Dipanggil sesuai struktur folder: resources/views/admin/auth/register.blade.php
         if (view()->exists('admin.auth.register')) {
             return view('admin.auth.register');
         }
 
-        if (view()->exists('admin.register')) {
-            return view('admin.register');
-        }
-
-        return view('auth.register');
+        return view('admin.register');
     }
 
-    /**
-     * Proses Register Admin
-     */
     public function register(Request $request)
     {
         $validated = $request->validate([
@@ -85,7 +64,7 @@ class AdminDashboardController extends Controller
             'name'     => $validated['name'],
             'email'    => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'is_admin' => true,
+            'role'     => 'admin',
         ]);
 
         Auth::login($user);
@@ -93,13 +72,9 @@ class AdminDashboardController extends Controller
         return redirect()->route('admin.dashboard');
     }
 
-    /**
-     * Logout Admin / User
-     */
     public function logout(Request $request)
     {
         Auth::logout();
-
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
@@ -116,27 +91,142 @@ class AdminDashboardController extends Controller
             'shipfinder_key' => Setting::get('shipfinder_key', env('SHIPFINDER_API_KEY')),
         ];
 
-        $apiLogs = [
-            (object) [
-                'created_at'     => now(),
-                'target_service' => 'ShipFinder API',
-                'status_request' => 'Live Marine Sync Successful',
-                'response_code'  => 200,
-            ],
-            (object) [
-                'created_at'     => now()->subMinutes(15),
-                'target_service' => 'GNews Engine',
-                'status_request' => 'News Fetch Completed',
-                'response_code'  => 200,
-            ],
+        // Konfigurasi Grafik Dinamis (Disimpan di Settings)
+        $defaultCharts = [
+            ['id' => 'vessel_traffic', 'name' => 'Lalu Lintas Kapal Global', 'type' => 'line', 'order' => 1, 'visible' => true],
+            ['id' => 'port_congestion', 'name' => 'Kepadatan Pelabuhan Utama', 'type' => 'bar', 'order' => 2, 'visible' => true],
+            ['id' => 'supply_chain_risk', 'name' => 'Indeks Risiko Rantai Pasok', 'type' => 'pie', 'order' => 3, 'visible' => true],
         ];
 
-        return view('admin.dashboard', compact('apiKeys', 'apiLogs'));
+        $chartConfig = Setting::get('admin_charts_config', json_encode($defaultCharts));
+        $charts = json_decode($chartConfig, true) ?? $defaultCharts;
+
+        usort($charts, fn($a, $b) => $a['order'] <=> $b['order']);
+
+        $apiLogs = [
+            (object) ['created_at' => now(), 'target_service' => 'ShipFinder API', 'status_request' => 'Live Marine Sync Successful', 'response_code' => 200],
+            (object) ['created_at' => now()->subMinutes(15), 'target_service' => 'GNews Engine', 'status_request' => 'News Fetch Completed', 'response_code' => 200],
+        ];
+
+        $portsCount = Port::count();
+        $routesCount = MarineRoute::count();
+
+        return view('admin.dashboard', compact('apiKeys', 'apiLogs', 'charts', 'portsCount', 'routesCount'));
     }
 
     /**
-     * Tampilkan Halaman Form Pengaturan Tampilan User
+     * Update Urutan / Visibility Grafik Admin
      */
+    public function updateChartsConfig(Request $request)
+    {
+        $charts = $request->input('charts', []);
+        
+        Setting::updateOrCreate(
+            ['key' => 'admin_charts_config'],
+            ['value' => json_encode($charts)]
+        );
+
+        return redirect()->back()->with('success', 'Susunan grafik berhasil diperbarui!');
+    }
+
+    /**
+     * Reset Grafik ke Default Sesuai Data API
+     */
+    public function resetChartsConfig()
+    {
+        $defaultCharts = [
+            ['id' => 'vessel_traffic', 'name' => 'Lalu Lintas Kapal Global (Live API)', 'type' => 'line', 'order' => 1, 'visible' => true],
+            ['id' => 'port_congestion', 'name' => 'Kepadatan Pelabuhan Utama (Live API)', 'type' => 'bar', 'order' => 2, 'visible' => true],
+            ['id' => 'supply_chain_risk', 'name' => 'Indeks Risiko Rantai Pasok (Live API)', 'type' => 'pie', 'order' => 3, 'visible' => true],
+        ];
+
+        Setting::updateOrCreate(
+            ['key' => 'admin_charts_config'],
+            ['value' => json_encode($defaultCharts)]
+        );
+
+        return redirect()->back()->with('success', 'Konfigurasi grafik telah di-reset sesuai data API!');
+    }
+
+    /**
+     * Tambah Grafik Baru Secara Dinamis
+     */
+    public function addChart(Request $request)
+    {
+        $validated = $request->validate([
+            'chart_name' => 'required|string|max:255',
+            'chart_type' => 'required|in:line,bar,pie,donut',
+        ]);
+
+        $currentConfig = json_decode(Setting::get('admin_charts_config', '[]'), true);
+        $newOrder = count($currentConfig) + 1;
+
+        $newChart = [
+            'id'      => 'custom_' . time(),
+            'name'    => $validated['chart_name'],
+            'type'    => $validated['chart_type'],
+            'order'   => $newOrder,
+            'visible' => true,
+        ];
+
+        $currentConfig[] = $newChart;
+
+        Setting::updateOrCreate(
+            ['key' => 'admin_charts_config'],
+            ['value' => json_encode($currentConfig)]
+        );
+
+        return redirect()->back()->with('success', 'Grafik baru berhasil ditambahkan!');
+    }
+
+    /**
+     * Manajemen Pelabuhan & Rute
+     */
+    public function ports()
+    {
+        $ports = Port::withCount(['originRoutes', 'destinationRoutes'])->latest()->get();
+        $routes = MarineRoute::with(['originPort', 'destinationPort'])->latest()->get();
+
+        return view('admin.ports', compact('ports', 'routes'));
+    }
+
+    /**
+     * Simpan Pelabuhan Baru
+     */
+    public function storePort(Request $request)
+    {
+        $validated = $request->validate([
+            'name'      => 'required|string|max:255',
+            'code'      => 'required|string|max:10|unique:ports,code',
+            'country'   => 'required|string|max:255',
+            'latitude'  => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'status'    => 'required|in:active,congested,closed',
+        ]);
+
+        Port::create($validated);
+
+        return redirect()->back()->with('success', 'Pelabuhan baru berhasil ditambahkan!');
+    }
+
+    /**
+     * Simpan Rute Laut Baru
+     */
+    public function storeRoute(Request $request)
+    {
+        $validated = $request->validate([
+            'route_name'             => 'required|string|max:255',
+            'origin_port_id'         => 'required|exists:ports,id',
+            'destination_port_id'    => 'required|exists:ports,id|different:origin_port_id',
+            'estimated_transit_days' => 'required|integer|min:1',
+            'risk_level'             => 'required|in:low,medium,high,critical',
+        ]);
+
+        MarineRoute::create($validated);
+
+        return redirect()->back()->with('success', 'Rute maritim berhasil ditambahkan!');
+    }
+
     public function settings()
     {
         $settings = [
@@ -151,48 +241,28 @@ class AdminDashboardController extends Controller
         return view('admin.settings', compact('settings'));
     }
 
-    /**
-     * Update Pengaturan Tampilan User
-     */
     public function updateSettings(Request $request)
     {
         $data = $request->except('_token');
-
         foreach ($data as $key => $value) {
-            Setting::updateOrCreate(
-                ['key' => $key],
-                ['value' => $value]
-            );
+            Setting::updateOrCreate(['key' => $key], ['value' => $value]);
         }
-
         return redirect()->back()->with('success', 'Tampilan User Berhasil Diperbarui!');
     }
 
-    /**
-     * Update API Keys Dinamis
-     */
     public function updateApiKeys(Request $request)
     {
         $data = $request->except('_token');
-
         foreach ($data as $key => $value) {
-            Setting::updateOrCreate(
-                ['key' => $key],
-                ['value' => $value]
-            );
+            Setting::updateOrCreate(['key' => $key], ['value' => $value]);
         }
-
         return redirect()->back()->with('success', 'API Keys Dinamis Berhasil Diperbarui!');
     }
 
     public function users()
     {
-        return view('admin.users');
-    }
-
-    public function ports()
-    {
-        return view('admin.ports');
+        $users = User::all();
+        return view('admin.users', compact('users'));
     }
 
     public function articles()
