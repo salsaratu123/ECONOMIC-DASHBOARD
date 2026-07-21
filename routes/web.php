@@ -38,9 +38,12 @@ Route::get('/watchlist', [CountryController::class, 'watchlist'])->name('countri
 
 /*
 |--------------------------------------------------------------------------
-| Admin Authentication Routes
+| Admin Authentication Routes (Ditambahkan alias route 'login')
 |--------------------------------------------------------------------------
 */
+// Fallback alias 'login' agar Middleware Auth Laravel tidak throw Exception 500
+Route::get('/login', [AdminDashboardController::class, 'showLoginForm'])->name('login');
+
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login', [AdminDashboardController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AdminDashboardController::class, 'login'])->name('login.submit');
@@ -51,7 +54,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Admin Dashboard Group
+| Admin Dashboard Group (Terproteksi Middleware Auth)
 |--------------------------------------------------------------------------
 */
 Route::prefix('admin')->name('admin.')->middleware(['auth', IsAdmin::class])->group(function () {
