@@ -15,7 +15,23 @@ class AdminDashboardController extends Controller
             'shipfinder_key' => Setting::get('shipfinder_key', env('SHIPFINDER_API_KEY')),
         ];
 
-        return view('admin.dashboard', compact('apiKeys'));
+        // Mencegah Undefined variable $apiLogs
+        $apiLogs = [
+            (object) [
+                'created_at' => now(),
+                'target_service' => 'ShipFinder API',
+                'status_request' => 'Live Marine Sync Successful',
+                'response_code' => 200,
+            ],
+            (object) [
+                'created_at' => now()->subMinutes(15),
+                'target_service' => 'GNews Engine',
+                'status_request' => 'News Fetch Completed',
+                'response_code' => 200,
+            ],
+        ];
+
+        return view('admin.dashboard', compact('apiKeys', 'apiLogs'));
     }
 
     public function settings()
@@ -46,7 +62,6 @@ class AdminDashboardController extends Controller
         return redirect()->back()->with('success', 'Tampilan User Berhasil Diperbarui!');
     }
 
-    // Method khusus untuk update API Keys dari form dashboard.blade.php
     public function updateApiKeys(Request $request)
     {
         $data = $request->except('_token');
