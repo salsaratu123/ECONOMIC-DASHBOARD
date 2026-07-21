@@ -17,10 +17,20 @@ export function initializeMap() {
 
     countryLayer = L.layerGroup().addTo(map);
     portLayer = L.layerGroup().addTo(map);
+
+    // FIX: Force Leaflet merender ulang ukurannya setelah DOM selesai memuat
+    setTimeout(() => {
+        if (map) {
+            map.invalidateSize();
+        }
+    }, 300);
 }
 
 export function updateWorldMap(data) {
     if (!map) return;
+
+    // FIX: Memastikan peta menyesuaikan ukuran container saat ada pembaruan data
+    map.invalidateSize();
 
     countryLayer.clearLayers();
     portLayer.clearLayers();
@@ -40,7 +50,7 @@ export function updateWorldMap(data) {
             // 1. Gambar titik koordinat di Peta Leaflet
             addPortMarker(port);
             
-            // 2. Tulis data ke dalam tabel HTML jika elemen tabel ditemukan di halaman
+            // 2. Tulis data ke dalam tabel HTML jika elemen tabel ditemukan
             if (tableBody) {
                 const congestionVal = port.congestion ?? 50;
                 const badgeColor = congestionVal > 70 ? 'danger' : (congestionVal > 40 ? 'warning' : 'success');
@@ -88,7 +98,7 @@ function addCountryMarker(country, risk) {
 
     const markerIcon = L.divIcon({
         className: 'custom-div-icon',
-        html: `<div style='background-color:#1e3c72; width:14px; height:14px; border:2px solid #fff; border-radius:50%; shadow:0 0 8px rgba(0,0,0,0.3)'></div>`,
+        html: `<div style='background-color:#1e3c72; width:14px; height:14px; border:2px solid #fff; border-radius:50%; box-shadow:0 0 8px rgba(0,0,0,0.3)'></div>`,
         iconSize: [14, 14],
         iconAnchor: [7, 7]
     });

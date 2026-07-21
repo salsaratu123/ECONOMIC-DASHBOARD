@@ -2,38 +2,58 @@
 
 namespace App\Services;
 
+use App\Models\Setting;
+use App\Models\ApiLog;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class CountryService
 {
-    protected string $apiKey;
-    protected string $baseUrl;
+    // Base URL sesuai Dokumentasi REST Countries Pro v5
+    protected string $baseUrl = 'https://api.restcountries.com/countries/v5'; 
 
-    public function __construct()
+    /**
+     * Ambil API Key Dinamis dari Web Admin (Tabel Settings)
+     */
+    protected function getApiKey(): string
     {
-        // Mengambil token API Key langsung dari file .env secara aman
-        $this->apiKey = env('RESTCOUNTRIES_API_KEY', 'rc_live_3f1b69a5835f4ef0983053a55c332c10');
-        $this->baseUrl = 'https://api.restcountries.com/v1'; 
+        return Setting::get('restcountries_api_key', env('RESTCOUNTRIES_API_KEY', 'rc_live_3f1b69a5835f4ef0983053a55c332c10'));
     }
 
     /**
-     * Ambil SEMUA negara di dunia langsung dari API Eksternal
+     * Helper Pencatatan Activity Logs
+     */
+    protected function logActivity(string $status, int $code = 200)
+    {
+        try {
+            ApiLog::create([
+                'target_service' => 'REST Countries Pro v5',
+                'status_request' => $status,
+                'response_code' => $code,
+            ]);
+        } catch (\Throwable $e) {}
+    }
+
+    /**
+     * Ambil SEMUA negara dari API v5
      */
     public function all(): array
     {
         try {
-            // Melakukan HTTP GET Request dengan Header Otorisasi Key
+            $apiKey = $this->getApiKey();
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->apiKey
-            ])->timeout(5)->get("{$this->baseUrl}/countries");
+                'Authorization' => 'Bearer ' . $apiKey
+            ])->timeout(5)->get($this->baseUrl);
 
             if ($response->successful()) {
+                $this->logActivity('ISO Country Profile Sync Success', 200);
                 $data = $response->json();
-                // Jika API mereturn format bersarang, sesuaikan mapping datanya
                 return $data['data'] ?? $data ?? $this->getFallbackCountries();
             }
+
+            $this->logActivity('API Key Invalid / Pro Query Failed (' . $response->reason() . ')', $response->status());
         } catch (\Throwable $e) {
+            $this->logActivity('Connection Timeout / Service Down', 500);
             Log::error("REST Countries API All Error: " . $e->getMessage());
         }
 
@@ -41,35 +61,43 @@ class CountryService
     }
 
     /**
-     * Cari detail spesifik negara berdasarkan 3-Digit Kode ISO (CCA3)
+     * Cari detail spesifik berdasarkan Kode ISO (CCA3) via v5 API
      */
     public function findByIso(string $isoCode): ?array
     {
         $isoCode = strtoupper(trim($isoCode));
+        $apiKey = $this->getApiKey();
         
         try {
+            // Menggunakan query search v5 sesuai contoh dokumentasi: ?q=CODE
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->apiKey
-            ])->timeout(4)->get("{$this->baseUrl}/countries/{$isoCode}");
+                'Authorization' => 'Bearer ' . $apiKey
+            ])->timeout(5)->get($this->baseUrl, [
+                'q' => $isoCode
+            ]);
 
             if ($response->successful()) {
                 $data = $response->json();
-                $country = $data['data'] ?? $data;
+                $countries = $data['data'] ?? $data ?? [];
                 
-                if ($country) {
-                    return $this->normalizeCountryData($country);
+                if (!empty($countries)) {
+                    $this->logActivity("ISO Query Success ({$isoCode})", 200);
+                    $target = is_array($countries) && isset($countries[0]) ? $countries[0] : $countries;
+                    return $this->normalizeCountryData($target);
                 }
             }
+
+            $this->logActivity("ISO Query Failed ({$isoCode})", $response->status() > 0 ? $response->status() : 404);
         } catch (\Throwable $e) {
+            $this->logActivity("ISO Query Timeout ({$isoCode})", 500);
             Log::warning("REST Countries API Find Error, using fallback: " . $e->getMessage());
         }
 
-        // Jika API Timeout / gagal merespon, aktifkan mekanisme fail-safe canggih
         return $this->getFallbackByIso($isoCode);
     }
 
     /**
-     * Cari detail spesifik negara berdasarkan Nama
+     * Cari detail spesifik berdasarkan Nama
      */
     public function find(string $name): ?array
     {
@@ -77,21 +105,28 @@ class CountryService
             return $this->findByIso('IDN');
         }
 
+        $apiKey = $this->getApiKey();
+
         try {
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->apiKey
-            ])->timeout(4)->get("{$this->baseUrl}/countries", [
-                'search' => $name
+                'Authorization' => 'Bearer ' . $apiKey
+            ])->timeout(5)->get($this->baseUrl, [
+                'q' => $name
             ]);
 
             if ($response->successful()) {
                 $data = $response->json();
                 $countries = $data['data'] ?? $data ?? [];
                 if (!empty($countries)) {
-                    return $this->normalizeCountryData($countries[0]);
+                    $this->logActivity("Search Country Success ({$name})", 200);
+                    $target = is_array($countries) && isset($countries[0]) ? $countries[0] : $countries;
+                    return $this->normalizeCountryData($target);
                 }
             }
+
+            $this->logActivity("Search Country Failed ({$name})", $response->status() > 0 ? $response->status() : 404);
         } catch (\Throwable $e) {
+            $this->logActivity("Search Country Timeout ({$name})", 500);
             Log::error("REST Countries API Search Error: " . $e->getMessage());
         }
 
@@ -99,14 +134,14 @@ class CountryService
     }
 
     /**
-     * Standardisasi format data dari API ke format JavaScript frontend agar tidak crash
+     * Standardisasi format data dari API ke format JavaScript frontend
      */
     protected function normalizeCountryData(array $c): array
     {
         return [
-            'name' => $c['name'] ?? $c['common_name'] ?? 'Unknown',
-            'cca3' => $c['cca3'] ?? $c['iso_code'] ?? 'IDN',
-            'iso_code' => $c['cca3'] ?? $c['iso_code'] ?? 'IDN',
+            'name' => $c['name'] ?? $c['common_name'] ?? $c['official_name'] ?? 'Indonesia',
+            'cca3' => $c['cca3'] ?? $c['iso_code'] ?? $c['iso3'] ?? 'IDN',
+            'iso_code' => $c['cca3'] ?? $c['iso_code'] ?? $c['iso3'] ?? 'IDN',
             'capital' => $c['capital'] ?? 'Jakarta',
             'region' => $c['region'] ?? 'Asia',
             'population' => $c['population'] ?? 275501339,
@@ -120,7 +155,7 @@ class CountryService
     }
 
     /**
-     * Data Backup Utama jika Limit API Habis / Tidak ada Internet (UAS Safe Guard)
+     * Fallback Data jika internet/API terputus
      */
     protected function getFallbackCountries(): array
     {
