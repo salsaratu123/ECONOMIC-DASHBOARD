@@ -11,6 +11,7 @@ use App\Http\Controllers\MarineController;
 use App\Http\Controllers\UserPreferenceController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Middleware\IsAdmin;
+use Illuminate\Support\Facades\DB;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,7 +36,7 @@ Route::get('/countries', [CountryController::class, 'index'])->name('countries.i
 Route::get('/news', [NewsController::class, 'index'])->name('news.index');
 
 // =========================================================================
-// API ENDPOINTS (Diperlukan oleh JS Frontend agar "Dashboard Offline" Hilang)
+// API ENDPOINTS (Penyokong Utama Frontend JS Dashboard)
 // =========================================================================
 Route::prefix('api')->group(function () {
     // API Data Negara
@@ -43,14 +44,42 @@ Route::prefix('api')->group(function () {
     Route::get('/countries/{code}', [CountryController::class, 'getCountryDetail']);
     Route::post('/countries/compare', [CountryController::class, 'compare']);
 
-    // API Cuaca & Indikator Ekonomi (Penyokong Dashboard Utama)
+    // API Cuaca & Indikator Ekonomi
     Route::get('/weather/data', [WeatherController::class, 'data']);
     Route::get('/economy/data', [EconomyController::class, 'data']);
     Route::get('/exchange/data', [ExchangeController::class, 'data']);
+
+    // API Ports (Penentu Utama Status Dashboard)
+    Route::get('/ports', function () {
+        try {
+            $ports = DB::table('ports')->get();
+            return response()->json([
+                'status' => 'success',
+                'data' => $ports
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    });
+
+    // API Settings (Konfigurasi Dynamic Dashboard)
+    Route::get('/settings', function () {
+        try {
+            $settings = DB::table('settings')->pluck('value', 'key');
+            return response()->json([
+                'status' => 'success',
+                'data' => $settings
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    });
 });
 
-// Direct Route Fallback untuk Frontend yang Panggil Tanpa Prefix /api
+// Direct Route Fallbacks & Alternative Endpoints
 Route::get('/countries/list', [CountryController::class, 'getCountries']);
+Route::get('/ports', function () { return redirect('/api/ports'); });
+Route::get('/settings', function () { return redirect('/api/settings'); });
 
 // Modul Marine Traffic View & AJAX Endpoints
 Route::get('/marine', [MarineController::class, 'index'])->name('marine.index');
@@ -85,7 +114,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', IsAdmin::class])->gr
     // Dashboard Utama Admin
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     
-    // Management Grafik Dinamis Admin (Urutan, Tambah & Reset via API)
+    // Management Grafik Dinamis Admin
     Route::post('/charts/update', [AdminDashboardController::class, 'updateChartsConfig'])->name('charts.update');
     Route::post('/charts/reset', [AdminDashboardController::class, 'resetChartsConfig'])->name('charts.reset');
     Route::post('/charts/add', [AdminDashboardController::class, 'addChart'])->name('charts.add');
