@@ -18,7 +18,7 @@ use App\Http\Middleware\IsAdmin;
 |--------------------------------------------------------------------------
 */
 
-// Halaman Utama Public Dashboard
+// Halaman Utama Public Dashboard & AJAX Data API Engine
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
 Route::get('/api/dashboard', [DashboardController::class, 'data']);
 
@@ -33,6 +33,24 @@ Route::get('/economy', [EconomyController::class, 'index'])->name('economy.index
 Route::get('/exchange', [ExchangeController::class, 'index'])->name('exchange.index');
 Route::get('/countries', [CountryController::class, 'index'])->name('countries.index');
 Route::get('/news', [NewsController::class, 'index'])->name('news.index');
+
+// =========================================================================
+// API ENDPOINTS (Diperlukan oleh JS Frontend agar "Dashboard Offline" Hilang)
+// =========================================================================
+Route::prefix('api')->group(function () {
+    // API Data Negara
+    Route::get('/countries', [CountryController::class, 'getCountries']);
+    Route::get('/countries/{code}', [CountryController::class, 'getCountryDetail']);
+    Route::post('/countries/compare', [CountryController::class, 'compare']);
+
+    // API Cuaca & Indikator Ekonomi (Penyokong Dashboard Utama)
+    Route::get('/weather/data', [WeatherController::class, 'data']);
+    Route::get('/economy/data', [EconomyController::class, 'data']);
+    Route::get('/exchange/data', [ExchangeController::class, 'data']);
+});
+
+// Direct Route Fallback untuk Frontend yang Panggil Tanpa Prefix /api
+Route::get('/countries/list', [CountryController::class, 'getCountries']);
 
 // Modul Marine Traffic View & AJAX Endpoints
 Route::get('/marine', [MarineController::class, 'index'])->name('marine.index');
