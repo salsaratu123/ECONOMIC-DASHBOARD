@@ -11,29 +11,29 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Buat tabel ports jika belum ada
-        if (!Schema::hasTable('ports')) {
-            Schema::create('ports', function (Blueprint $table) {
-                $table->id();
-                $table->string('name');
-                $table->string('code')->unique();
-                $table->string('country');
-                $table->decimal('latitude', 10, 7);
-                $table->decimal('longitude', 10, 7);
-                $table->enum('status', ['active', 'congested', 'closed'])->default('active');
-                $table->timestamps();
-            });
-        }
+        // Drop tabel ports lama jika sempat terbuat agar tidak bentrok
+        Schema::dropIfExists('ports');
+
+        Schema::create('ports', function (Blueprint $table) {
+            $table->id();
+            $table->string('code')->unique();
+            $table->string('name');
+            $table->string('country')->nullable();
+            $table->decimal('latitude', 10, 7)->nullable();
+            $table->decimal('longitude', 10, 7)->nullable();
+            $table->string('status')->default('active');
+            $table->timestamps();
+        });
 
         // Buat tabel routes jika belum ada
         if (!Schema::hasTable('routes')) {
             Schema::create('routes', function (Blueprint $table) {
                 $table->id();
-                $table->string('route_name');
-                $table->foreignId('origin_port_id')->constrained('ports')->onDelete('cascade');
-                $table->foreignId('destination_port_id')->constrained('ports')->onDelete('cascade');
-                $table->integer('estimated_transit_days');
-                $table->enum('risk_level', ['low', 'medium', 'high', 'critical'])->default('low');
+                $table->string('route_code')->unique();
+                $table->string('origin_port_code');
+                $table->string('destination_port_code');
+                $table->string('status')->default('normal');
+                $table->integer('risk_level')->default(1);
                 $table->timestamps();
             });
         }

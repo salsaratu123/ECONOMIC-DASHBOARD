@@ -3,10 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use App\Models\Setting;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class DatabaseSeeder extends Seeder
 {
@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // 2. Seed Default Settings untuk Tampilan Dashboard
+        // 2. Seed Default Settings untuk Tampilan Dashboard Admin & Frontend
         $defaultSettings = [
             'site_title' => 'Global Supply Chain Risk Intelligence Platform',
             'hero_heading' => 'Real-Time Maritime & Supply Chain Intelligence',
@@ -45,8 +45,8 @@ class DatabaseSeeder extends Seeder
             );
         }
 
-        // 3. Seed Sample Ports (Jika Tabel Ports Ada)
-        if (\Illuminate\Support\Facades\Schema::hasTable('ports')) {
+        // 3. Seed Sample Ports (Hanya jika tabel 'ports' dan kolom 'code' benar-benar ada)
+        if (Schema::hasTable('ports') && Schema::hasColumn('ports', 'code')) {
             DB::table('ports')->updateOrInsert(
                 ['code' => 'IDTPP'],
                 [
@@ -59,7 +59,7 @@ class DatabaseSeeder extends Seeder
                     'updated_at' => now()
                 ]
             );
-            
+
             DB::table('ports')->updateOrInsert(
                 ['code' => 'SGSIN'],
                 [
