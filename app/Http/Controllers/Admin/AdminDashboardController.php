@@ -19,7 +19,17 @@ class AdminDashboardController extends Controller
         if (Auth::check()) {
             return redirect()->route('admin.dashboard');
         }
-        return view('admin.login');
+
+        // Dipanggil sesuai struktur folder: resources/views/admin/auth/login.blade.php
+        if (view()->exists('admin.auth.login')) {
+            return view('admin.auth.login');
+        }
+
+        if (view()->exists('admin.login')) {
+            return view('admin.login');
+        }
+
+        return view('auth.login');
     }
 
     /**
@@ -48,7 +58,16 @@ class AdminDashboardController extends Controller
      */
     public function showRegisterForm()
     {
-        return view('admin.register');
+        // Dipanggil sesuai struktur folder: resources/views/admin/auth/register.blade.php
+        if (view()->exists('admin.auth.register')) {
+            return view('admin.auth.register');
+        }
+
+        if (view()->exists('admin.register')) {
+            return view('admin.register');
+        }
+
+        return view('auth.register');
     }
 
     /**
@@ -97,7 +116,6 @@ class AdminDashboardController extends Controller
             'shipfinder_key' => Setting::get('shipfinder_key', env('SHIPFINDER_API_KEY')),
         ];
 
-        // Telemetry Logs Dummy / Stream
         $apiLogs = [
             (object) [
                 'created_at'     => now(),
